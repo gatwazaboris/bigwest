@@ -1,0 +1,75 @@
+'use client';
+
+import { LocalizedInput, LocalizedTextarea } from '@/components/admin/forms/LocalizedFields';
+import { toEditableOffer } from '@/lib/utils/site-normalizers';
+import type { Offer } from '@/types/site';
+
+export default function OffersManager({
+  offers,
+  form,
+  editingId,
+  saving,
+  onFormChange,
+  onEdit,
+  onReset,
+  onSave,
+  onDelete,
+}: {
+  offers: Offer[];
+  form: ReturnType<typeof toEditableOffer>;
+  editingId: string | null;
+  saving: boolean;
+  onFormChange: (value: ReturnType<typeof toEditableOffer>) => void;
+  onEdit: (offer: Offer) => void;
+  onReset: () => void;
+  onSave: () => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div style={gridStyle}>
+      <section style={cardStyle}>
+        <h2>{editingId ? 'Edit Offer' : 'Create Offer'}</h2>
+        <LocalizedInput label="Title" value={form.title} onChange={(value) => onFormChange({ ...form, title: value })} />
+        <LocalizedTextarea label="Description" value={form.description} onChange={(value) => onFormChange({ ...form, description: value })} />
+        <label style={labelStyle}>Discount %</label>
+        <input style={inputStyle} type="number" min={0} max={100} value={form.discountPercent} onChange={(event) => onFormChange({ ...form, discountPercent: Number(event.target.value) || 0 })} />
+        <label style={checkboxStyle}><input type="checkbox" checked={form.active} onChange={(event) => onFormChange({ ...form, active: event.target.checked })} /> Active</label>
+        <div style={actionRow}>
+          <button style={primaryButton} disabled={saving} onClick={onSave}>{editingId ? 'Update Offer' : 'Create Offer'}</button>
+          {editingId ? <button style={secondaryButton} onClick={onReset}>Cancel</button> : null}
+        </div>
+      </section>
+
+      <section style={cardStyle}>
+        <h2>All Offers</h2>
+        <div style={{ display: 'grid', gap: 12 }}>
+          {offers.map((offer) => (
+            <article key={offer.id} style={itemStyle}>
+              <div>
+                <strong>{offer.title.en}</strong>
+                <div style={subtleStyle}>{offer.discountPercent}% • {offer.active ? 'Active' : 'Inactive'}</div>
+              </div>
+              <div style={actionColumn}>
+                <button style={secondaryButton} onClick={() => onEdit(offer)}>Edit</button>
+                <button style={dangerButton} onClick={() => onDelete(offer.id)}>Delete</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 };
+const cardStyle: React.CSSProperties = { background: 'white', borderRadius: 24, padding: 22, boxShadow: '0 12px 32px rgba(15,23,42,0.08)' };
+const itemStyle: React.CSSProperties = { display: 'flex', gap: 12, justifyContent: 'space-between', padding: 14, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 18 };
+const actionColumn: React.CSSProperties = { display: 'grid', gap: 8, alignContent: 'start' };
+const actionRow: React.CSSProperties = { display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' };
+const labelStyle: React.CSSProperties = { display: 'block', marginTop: 12, marginBottom: 6, fontWeight: 600 };
+const inputStyle: React.CSSProperties = { width: '100%', border: '1px solid #cbd5e1', borderRadius: 14, padding: 12 };
+const checkboxStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 };
+const subtleStyle: React.CSSProperties = { color: '#64748b', fontSize: 14, marginTop: 4 };
+const primaryButton: React.CSSProperties = { border: 0, background: '#2563eb', color: 'white', borderRadius: 14, padding: '12px 16px', cursor: 'pointer' };
+const secondaryButton: React.CSSProperties = { border: '1px solid #cbd5e1', background: 'white', borderRadius: 14, padding: '10px 14px', cursor: 'pointer' };
+const dangerButton: React.CSSProperties = { border: 0, background: '#dc2626', color: 'white', borderRadius: 14, padding: '10px 14px', cursor: 'pointer' };

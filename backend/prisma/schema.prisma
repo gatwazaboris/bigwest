@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @db.VarChar(255)
+  name         String?  @db.VarChar(191)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ClientUser {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String    @db.VarChar(255)
+  name               String    @db.VarChar(191)
+  phone              String?   @db.VarChar(64)
+  profileImage       String    @default("") @db.LongText
+  emailVerified      Boolean   @default(false)
+  emailVerifyToken   String?   @db.VarChar(128)
+  emailVerifyExpires DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  bookings           Booking[]
+}
+
+model Tour {
+  id          String    @id @default(cuid())
+  name        Json
+  description Json
+  duration    Json
+  category    String    @db.VarChar(32)
+  priceUsd    Float
+  status      String    @db.VarChar(32)
+  featured    Boolean   @default(false)
+  images      Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  bookings    Booking[]
+}
+
+model Offer {
+  id              String   @id @default(cuid())
+  title           Json
+  description     Json
+  discountPercent Int
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model GalleryItem {
+  id        String   @id @default(cuid())
+  title     Json
+  imageData String   @db.LongText
+  featured  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSettings {
+  id             String   @id @db.VarChar(32)
+  companyName    String   @default("Visit KIBUYE") @db.VarChar(191)
+  companyTagline String   @default("Kibuye • Karongi • Lake Kivu") @db.VarChar(255)
+  logoImage      String   @default("") @db.LongText
+  heroTitle      Json
+  heroSubtitle   Json
+  aboutTitle     Json
+  aboutText      Json
+  heroImages     Json     @default("[]")
+  pages          Json     @default("{}")
+  contactEmail   String   @db.VarChar(191)
+  whatsappNumber String   @db.VarChar(64)
+  phoneNumber    String   @db.VarChar(64)
+  location       String   @db.VarChar(255)
+  facebookUrl    String   @default("") @db.VarChar(500)
+  instagramUrl   String   @default("") @db.VarChar(500)
+  tiktokUrl      String   @default("") @db.VarChar(500)
+  youtubeUrl     String   @default("") @db.VarChar(500)
+  twitterUrl     String   @default("") @db.VarChar(500)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Booking {
+  id              String     @id @default(cuid())
+  clientUserId    String
+  tourId          String
+  tourDate        DateTime   @db.Date
+  guests          Int        @default(1)
+  status          String     @db.VarChar(32) @default("pending")
+  notes           String?    @db.Text
+  contactPhone    String?    @db.VarChar(64)
+  totalPriceUsd   Float
+  adminNotes      String?    @db.Text
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  clientUser      ClientUser @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+  tour            Tour       @relation(fields: [tourId], references: [id], onDelete: Restrict)
+
+  @@index([clientUserId])
+  @@index([tourId])
+  @@index([status])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(191)
+  email     String   @db.VarChar(191)
+  phone     String?  @db.VarChar(64)
+  message   String   @db.Text
+  status    String   @default("new") @db.VarChar(32)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

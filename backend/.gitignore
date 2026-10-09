@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+.env.cpanel
+*.log
+cpanel-deploy
+cpanel-deploy.zip
